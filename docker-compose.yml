@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: .
+    container_name: rzl-laravel
+    ports:
+      - 80:80
+    volumes:
+      - ./app:/app
+    depends_on:
+      - db
+    restart: unless-stopped
+  db:
+    image: mariadb:10.6.14-focal
+    container_name: rzl-mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+  pma:
+    image: phpmyadmin:5.2.1-apache
+    container_name: rzl-pma
+    ports:
+      - 8070:80
+    environment:
+      PMA_HOST: db
+      PMA_ARBITRARY: 1
+      TZ: Asia/Tehran
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      - db
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: rzl-redis
+    ports:
+      - 6379:6379
